@@ -17,5 +17,5 @@ direct_dependencies:
 - garag/esp-idf-pn532
 - idf
 manifest_hash: 01baea63f41cd21708c748d40446796f5b87ddea242b1bb5221851d03737a53e
-target: esp32c3
+target: esp32
 version: 2.0.0
