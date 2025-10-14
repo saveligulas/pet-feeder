@@ -1,9 +1,15 @@
 #ifndef RFID_H
 #define RFID_H
 
-#define SDA_PIN 6
-#define SCL_PIN 7
-#include <stdint.h>
+#include "pn532.h"
+#include "pn532_i2c.h"
+#include "driver/i2c.h"
+#include "esp_log.h"
+
+#define I2C_MASTER_SDA_IO 21
+#define I2C_MASTER_SCL_IO 22
+#define I2C_MASTER_NUM I2C_NUM_0
+#define I2C_MASTER_FREQ_HZ 400000
 
 typedef struct RFID_Uid RFID_Uid_t;
 typedef struct RFID_Reader RFID_Reader_t;
@@ -15,6 +21,6 @@ struct RFID_Uid {
 };
 
 RFID_Reader_t* rfid_reader_init(RFID_Uid_Callback_f uid_cb);
-
+void rfid_poll(RFID_Reader_t);
 
 #endif //RFID_H
