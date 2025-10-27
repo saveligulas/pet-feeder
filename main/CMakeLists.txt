@@ -1,9 +1,4 @@
 idf_component_register(
-    SRCS
-        "src/pet-feeder.c"
-        "../components/rfid_reader/src/rfid_setup.c"
-    REQUIRES
-        garag__esp-idf-pn532
-        rfid_reader
-        rest_api
+    SRCS "src/pet-feeder.c"
+    REQUIRES rfid_reader pi_communicator freertos esp_system
 )

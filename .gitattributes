@@ -1,0 +1,12 @@
+# Enforce Unix-style (LF) line endings for all text files to prevent
+# issues with cross-platform development and tooling like the IDF component manager.
+* text=auto eol=lf
+
+# Explicitly mark common binary files to prevent them from being treated as text.
+*.bin binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.zip binary
+*.pdf binary
