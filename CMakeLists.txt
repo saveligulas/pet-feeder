@@ -6,7 +6,7 @@ include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(pet-feeder)
 
 # --- Host Test Specific Overrides ---
-if(TARGET_ARCH STREQUAL "host")
+if(CONFIG_IDF_TARGET_LINUX)
     set(EXTRA_COMPONENTS "${EXTRA_COMPONENTS};${CMAKE_CURRENT_SOURCE_DIR}/test")
     target_override_components(
             main
