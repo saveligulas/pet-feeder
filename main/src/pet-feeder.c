@@ -10,8 +10,6 @@
 #include "rfid.h"
 #include "pi_communicator.h"
 
-void esp_wifi_sta_get_rsnxe(void) {}
-
 static const char *TAG = "APP_MAIN";
 
 #define RFID_POLL_PERIOD_MS    500

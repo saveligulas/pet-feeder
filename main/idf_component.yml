@@ -2,7 +2,7 @@
 dependencies:
   ## Required IDF version
   idf:
-    version: '>=4.1.0'
+    version: '>=5.2.0'
 
   # Project dependencies
   garag/esp-idf-pn532: '*'
