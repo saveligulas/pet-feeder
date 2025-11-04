@@ -23,6 +23,8 @@ static QueueHandle_t rfid_uid_queue;
 static void rfid_uid_detected_callback(const RFID_Uid_t* uid) {
     if (uid == NULL) return;
 
+    ESP_LOGI(TAG, "RFID UID detected");
+
     RFID_Uid_t* uid_copy = (RFID_Uid_t*)malloc(sizeof(RFID_Uid_t) + uid->uid_len);
     if (uid_copy == NULL) {
         ESP_LOGE(TAG, "Failed to allocate memory for UID copy.");
@@ -63,10 +65,10 @@ void app_main(void) {
         return;
     }
 
-    if (pi_communicator_init(PI_ENDPOINT_URL) != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to initialize PI Communicator. Aborting.");
-        return;
-    }
+   // if (pi_communicator_init(PI_ENDPOINT_URL) != ESP_OK) {
+     //   ESP_LOGE(TAG, "Failed to initialize PI Communicator. Aborting.");
+       // return;
+//    }
 
     RFID_Reader_t* rfid_reader_handle = rfid_reader_init(rfid_uid_detected_callback);
     if (rfid_reader_handle == NULL) {
