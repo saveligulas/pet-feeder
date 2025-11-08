@@ -2,13 +2,12 @@
 #define RFID_READER_H
 
 #include "rfid.h"
-#include "driver/i2c_master.h"
-
+#include "driver/spi_master.h" // Use SPI header
 #include <stdint.h>
 
 struct RFID_Reader {
     RFID_Uid_Callback_f uid_callback;
-    i2c_master_dev_handle_t i2c_dev_handle;
+    spi_device_handle_t spi_handle; // Store the SPI device handle
 };
 
 #endif //RFID_READER_H
