@@ -4,15 +4,3 @@ cmake_minimum_required(VERSION 3.16)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(pet-feeder)
-
-# --- Host Test Specific Overrides ---
-if(CONFIG_IDF_TARGET_LINUX)
-    set(EXTRA_COMPONENTS "${EXTRA_COMPONENTS};${CMAKE_CURRENT_SOURCE_DIR}/test")
-    target_override_components(
-            main
-            COMPONENTS
-            garag__esp-idf-pn532
-            OVERRIDE_TO_COMPONENTS
-            mock_garag__esp-idf-pn532
-    )
-endif()

@@ -5,13 +5,12 @@
 #include "nvs_flash.h"
 #include "esp_http_client.h"
 #include "cJSON.h"
-#include "pn532.h"
 
 static const char *TAG = "PI_COMMUNICATOR";
 
 #define WIFI_SSID           "YOUR_WIFI_SSID" // CRITICAL: Replace with your Wi-Fi SSID
 #define WIFI_PASSWORD       "YOUR_WIFI_PASSWORD" // CRITICAL: Replace with your Wi-Fi Password
-#define MAX_WIFI_RETRIES    10 // CRITICAL: Define CONFIG_ESP_MAXIMUM_RETRY in sdkconfig for this
+#define MAX_WIFI_RETRIES    10
 #define MAX_HTTP_RECV_BUFFER 512
 
 static char *s_pi_endpoint_url = NULL;
@@ -95,16 +94,13 @@ esp_err_t pi_communicator_init(const char* pi_endpoint_url) {
     ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL, NULL));
     ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, NULL));
 
-    // --- THIS IS THE NEW, SIMPLIFIED CONFIGURATION ---
     wifi_config_t wifi_config = {
         .sta = {
             /* All other fields are zero-initialized by default */
         },
     };
-    // Copy the SSID and Password into the struct
     strcpy((char*)wifi_config.sta.ssid, WIFI_SSID);
     strcpy((char*)wifi_config.sta.password, WIFI_PASSWORD);
-    // --- END OF NEW CONFIGURATION ---
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));

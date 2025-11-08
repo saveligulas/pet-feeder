@@ -496,15 +496,6 @@ CONFIG_PARTITION_TABLE_MD5=y
 # end of Partition Table
 
 #
-# PN532 Options
-#
-# CONFIG_ENABLE_IRQ_ISR is not set
-CONFIG_PN532DEBUG=y
-# CONFIG_MIFAREDEBUG is not set
-# CONFIG_IRQDEBUG is not set
-# end of PN532 Options
-
-#
 # Compiler options
 #
 CONFIG_COMPILER_OPTIMIZATION_DEBUG=y

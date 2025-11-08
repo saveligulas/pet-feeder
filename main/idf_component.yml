@@ -5,5 +5,5 @@ dependencies:
     version: '>=5.2.0'
 
   # Project dependencies
-  garag/esp-idf-pn532: '*'
+  # garag/esp-idf-pn532: '*'  <-- REMOVED THIS LINE
   espressif/cjson: '*'
