@@ -12,94 +12,74 @@
 
 static const char *TAG = "APP_MAIN";
 
+// We don't use these in the init test, but they are needed for compilation
 #define RFID_POLL_PERIOD_MS    500
 #define PI_COMM_TASK_STACK_SIZE 4096
 #define RFID_POLL_TASK_STACK_SIZE 3072
 #define RFID_UID_QUEUE_LENGTH  10
-#define PI_ENDPOINT_URL        "http://192.168.1.100:5000/rfid_data" // CRITICAL: Replace with your RPi's actual IP and endpoint
 
-// --- NEW: Debugging Constants ---
+// --- Debugging Constants for the Test ---
 #define RFID_INIT_RETRY_COUNT  5
-#define RFID_INIT_RETRY_DELAY_MS 3000
+#define RFID_INIT_RETRY_DELAY_MS 2000 // 2 second delay between retries
 
+// These are not used in the init test, but the functions must exist for the code to compile
 static QueueHandle_t rfid_uid_queue;
+static void rfid_uid_detected_callback(const RFID_Uid_t* uid) { /* Dummy for now */ }
+static void pi_communicator_task(void* pvParameters) { while(1) vTaskDelay(10000); }
 
-static void rfid_uid_detected_callback(const RFID_Uid_t* uid) {
-    if (uid == NULL) return;
-
-    ESP_LOGI(TAG, "RFID UID detected, sending to queue...");
-
-    RFID_Uid_t* uid_copy = (RFID_Uid_t*)malloc(sizeof(RFID_Uid_t) + uid->uid_len);
-    if (uid_copy == NULL) {
-        ESP_LOGE(TAG, "Failed to allocate memory for UID copy.");
-        return;
-    }
-    uid_copy->uid_len = uid->uid_len;
-    memcpy(uid_copy->uid, uid->uid, uid->uid_len);
-
-    if (xQueueSend(rfid_uid_queue, &uid_copy, pdMS_TO_TICKS(100)) != pdPASS) {
-        ESP_LOGW(TAG, "RFID UID queue full, dropping UID.");
-        free(uid_copy);
-    }
-}
-
-static void pi_communicator_task(void* pvParameters) {
-    ESP_LOGI(TAG, "PI Communicator task started.");
-    RFID_Uid_t* received_uid_ptr;
-
-    while (1) {
-        if (xQueueReceive(rfid_uid_queue, &received_uid_ptr, portMAX_DELAY) == pdPASS) {
-            // In a real application, you would re-enable this after Wi-Fi is also initialized.
-            // esp_err_t err = pi_communicator_send_uid(received_uid_ptr);
-            // if (err != ESP_OK) {
-            //     ESP_LOGE(TAG, "Failed to send UID to RPi: %s", esp_err_to_name(err));
-            // } else {
-            //     ESP_LOGI(TAG, "Successfully sent UID to RPi.");
-            // }
-            free(received_uid_ptr);
-        }
-    }
-}
 
 void app_main(void) {
     ESP_LOGI(TAG, "Pet Feeder application starting...");
+    ESP_LOGI(TAG, "--- FINAL TEST: Using physically verified GPIOs for UART ---");
 
+
+    // The queue isn't used in the init test, but we create it so the code is complete
     rfid_uid_queue = xQueueCreate(RFID_UID_QUEUE_LENGTH, sizeof(RFID_Uid_t*));
     if (rfid_uid_queue == NULL) {
         ESP_LOGE(TAG, "Failed to create RFID UID queue. Aborting.");
         return;
     }
 
-    // --- MODIFIED: Initialization with Retry Logic ---
+    // --- Initialization with Retry Logic ---
     RFID_Reader_t* rfid_reader_handle = NULL;
 
     for (int i = 0; i < RFID_INIT_RETRY_COUNT; i++) {
         ESP_LOGI(TAG, "Attempting to initialize RFID reader (Attempt %d/%d)...", i + 1, RFID_INIT_RETRY_COUNT);
+
+        // This is the function we are testing
         rfid_reader_handle = rfid_reader_init(rfid_uid_detected_callback);
 
         if (rfid_reader_handle != NULL) {
-            ESP_LOGI(TAG, "RFID reader initialized successfully!");
-            break; // Success, exit the loop
+            // If rfid_reader_init() returns a valid handle, it means success!
+            ESP_LOGI(TAG, "Initialization attempt SUCCEEDED!");
+            break; // Exit the loop
         }
 
-        ESP_LOGE(TAG, "Initialization failed. Retrying in %dms...", RFID_INIT_RETRY_DELAY_MS);
+        // If it returned NULL, it failed.
+        ESP_LOGE(TAG, "Initialization attempt failed. Retrying in %dms...", RFID_INIT_RETRY_DELAY_MS);
         vTaskDelay(pdMS_TO_TICKS(RFID_INIT_RETRY_DELAY_MS));
     }
 
+    // --- Final Check ---
     if (rfid_reader_handle == NULL) {
-        ESP_LOGE(TAG, "Failed to initialize RFID reader after %d attempts. Aborting.", RFID_INIT_RETRY_COUNT);
-        return;
+        ESP_LOGE(TAG, "Failed to initialize RFID reader after %d attempts. Halting.", RFID_INIT_RETRY_COUNT);
+        // In a real product, you might want to blink an error LED here.
+        return; // Abort the application
     }
-    // --- END MODIFICATION ---
+
+    // If we get here, the RFID reader is initialized and ready.
+    ESP_LOGI(TAG, "Creating tasks...");
 
     RFID_Poll_Params_t rfid_poll_params = {
         .rfid_reader = rfid_reader_handle,
         .poll_period_ms = RFID_POLL_PERIOD_MS,
         .task_name = "RFID_Poll_Task"
     };
+    // The poll task in our test code will just print a message and halt.
     xTaskCreate(rfid_poll_task, rfid_poll_params.task_name, RFID_POLL_TASK_STACK_SIZE, &rfid_poll_params, 5, NULL);
 
+    // This task will just block, which is fine for our test.
     xTaskCreate(pi_communicator_task, "PI_Comm_Task", PI_COMM_TASK_STACK_SIZE, NULL, 5, NULL);
 
-    ESP_LOGI(TAG, "Pet Feeder application fully initialized and tasks started.");
+    ESP_LOGI(TAG, "Application fully initialized. Test successful.");
 }
