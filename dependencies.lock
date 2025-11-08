@@ -1,7 +1,6 @@
 dependencies:
   espressif/cjson:
-    component_hash: 
-      9372811fb197926f522c467627cf4a8e72b681e0366e17879631da801103aef3
+    component_hash: 9372811fb197926f522c467627cf4a8e72b681e0366e17879631da801103aef3
     dependencies:
     - name: idf
       require: private
@@ -11,8 +10,7 @@ dependencies:
       type: service
     version: 1.7.19
   garag/esp-idf-pn532:
-    component_hash: 
-      72354942a2736b1bb95b23012c142e036732885af7b2a041484f1920cd835a8b
+    component_hash: 72354942a2736b1bb95b23012c142e036732885af7b2a041484f1920cd835a8b
     dependencies:
     - name: idf
       require: private
@@ -24,7 +22,7 @@ dependencies:
   idf:
     source:
       type: idf
-    version: 5.2.6
+    version: 5.5.1
 direct_dependencies:
 - espressif/cjson
 - garag/esp-idf-pn532
