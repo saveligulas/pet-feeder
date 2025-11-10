@@ -11,10 +11,10 @@ static const char *TAG = "RFID_READER";
 // --- Pin Definitions (CORRECTED to match available header pins) ---
 #define PN532_HOST      SPI2_HOST
 #define PIN_NUM_MISO    GPIO_NUM_0
-#define PIN_NUM_MOSI    GPIO_NUM_5
-#define PIN_NUM_CLK     GPIO_NUM_6
-#define PIN_NUM_CS      GPIO_NUM_1
-#define PIN_NUM_RST     GPIO_NUM_9
+#define PIN_NUM_MOSI    GPIO_NUM_1
+#define PIN_NUM_CLK     GPIO_NUM_3
+#define PIN_NUM_CS      GPIO_NUM_9
+#define PIN_NUM_RST     GPIO_NUM_10
 // --- PN532 Constants ---
 #define PN532_PREAMBLE                  (0x00)
 #define PN532_STARTCODE1                (0x00)
