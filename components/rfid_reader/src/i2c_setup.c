@@ -3,13 +3,12 @@
 
 static const char *TAG = "I2C_DRIVER";
 
-// Global I2C bus handle
 i2c_master_bus_handle_t g_i2c_bus_handle = NULL;
 
 esp_err_t i2c_master_init(void) {
     i2c_master_bus_config_t bus_config = {
         .clk_source = I2C_CLK_SRC_DEFAULT,
-        .i2c_port = I2C_NUM_0,
+        .i2c_port = -1,
         .scl_io_num = I2C_MASTER_SCL_IO,
         .sda_io_num = I2C_MASTER_SDA_IO,
         .glitch_ignore_cnt = 7,

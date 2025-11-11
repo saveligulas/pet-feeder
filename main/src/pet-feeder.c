@@ -16,7 +16,7 @@ static const char *TAG = "APP_MAIN";
 #define PI_COMM_TASK_STACK_SIZE 4096
 #define RFID_POLL_TASK_STACK_SIZE 3072
 #define RFID_UID_QUEUE_LENGTH  10
-#define PI_ENDPOINT_URL        "http://192.168.1.100:5000/rfid_data" // CRITICAL: Replace with your RPi's actual IP and endpoint
+#define PI_ENDPOINT_URL        "http://192.168.1.100:5000/rfid_data"
 
 static QueueHandle_t rfid_uid_queue;
 
@@ -25,7 +25,6 @@ static void rfid_uid_detected_callback(const RFID_Uid_t* uid) {
 
     ESP_LOGI(TAG, "RFID UID detected, sending to queue...");
 
-    // Allocate a new block of memory for the UID to be sent to the queue
     RFID_Uid_t* uid_copy = (RFID_Uid_t*)malloc(sizeof(RFID_Uid_t) + uid->uid_len);
     if (uid_copy == NULL) {
         ESP_LOGE(TAG, "Failed to allocate memory for UID copy.");
@@ -33,11 +32,10 @@ static void rfid_uid_detected_callback(const RFID_Uid_t* uid) {
     }
     uid_copy->uid_len = uid->uid_len;
     memcpy(uid_copy->uid, uid->uid, uid->uid_len);
-
     // Send the pointer to the copied data to the queue
     if (xQueueSend(rfid_uid_queue, &uid_copy, pdMS_TO_TICKS(100)) != pdPASS) {
         ESP_LOGW(TAG, "RFID UID queue full, dropping UID.");
-        free(uid_copy); // Free the memory if sending fails
+        free(uid_copy);
     }
 }
 
@@ -46,7 +44,6 @@ static void pi_communicator_task(void* pvParameters) {
     RFID_Uid_t* received_uid_ptr;
 
     while (1) {
-        // Wait to receive a pointer from the queue
         if (xQueueReceive(rfid_uid_queue, &received_uid_ptr, portMAX_DELAY) == pdPASS) {
             esp_err_t err = pi_communicator_send_uid(received_uid_ptr);
             if (err != ESP_OK) {
@@ -54,7 +51,6 @@ static void pi_communicator_task(void* pvParameters) {
             } else {
                 ESP_LOGI(TAG, "Successfully sent UID to RPi.");
             }
-            // Free the memory that was allocated in the callback
             free(received_uid_ptr);
         }
     }
@@ -63,7 +59,6 @@ static void pi_communicator_task(void* pvParameters) {
 void app_main(void) {
     ESP_LOGI(TAG, "Pet Feeder application starting...");
 
-    // The queue will hold POINTERS to RFID_Uid_t structs
     rfid_uid_queue = xQueueCreate(RFID_UID_QUEUE_LENGTH, sizeof(RFID_Uid_t*));
     if (rfid_uid_queue == NULL) {
         ESP_LOGE(TAG, "Failed to create RFID UID queue. Aborting.");
@@ -79,14 +74,12 @@ void app_main(void) {
    }
    */
 
-    // Initialize the RFID reader
     RFID_Reader_t* rfid_reader_handle = rfid_reader_init(rfid_uid_detected_callback);
     if (rfid_reader_handle == NULL) {
         ESP_LOGE(TAG, "Failed to initialize RFID reader. Aborting.");
         return;
     }
 
-    // Create the polling task
     RFID_Poll_Params_t rfid_poll_params = {
         .rfid_reader = rfid_reader_handle,
         .poll_period_ms = RFID_POLL_PERIOD_MS,
@@ -94,7 +87,6 @@ void app_main(void) {
     };
     xTaskCreate(&rfid_poll_task, rfid_poll_params.task_name, RFID_POLL_TASK_STACK_SIZE, &rfid_poll_params, 5, NULL);
 
-    // Create the communication task
     xTaskCreate(&pi_communicator_task, "PI_Comm_Task", PI_COMM_TASK_STACK_SIZE, NULL, 5, NULL);
 
     ESP_LOGI(TAG, "Pet Feeder application fully initialized and tasks started.");

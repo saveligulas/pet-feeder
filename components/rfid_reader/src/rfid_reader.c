@@ -6,10 +6,8 @@
 
 static const char *TAG = "RFID_READER";
 
-// Use GPIO3 as defined on your schematic
 #define PN532_RESET_PIN (GPIO_NUM_3)
 
-// --- PN532 Constants ---
 #define PN532_I2C_ADDRESS               (0x24)
 #define PN532_PREAMBLE                  (0x00)
 #define PN532_STARTCODE1                (0x00)
@@ -19,7 +17,6 @@ static const char *TAG = "RFID_READER";
 #define PN532_HOSTTOPN532               (0xD4)
 #define PN532_PN532TOHOST               (0xD5)
 
-// --- PN532 Commands ---
 #define PN532_COMMAND_GETFIRMWAREVERSION (0x02)
 #define PN532_COMMAND_SAMCONFIGURATION   (0x14)
 #define PN532_COMMAND_INLISTPASSIVETARGET (0x4A)
@@ -27,10 +24,8 @@ static const char *TAG = "RFID_READER";
 #define PN532_ACK_TIMEOUT_MS            (1000)
 #define PN532_COMM_TIMEOUT_MS           (1000)
 
-// --- PN532 Card Types ---
 #define PN532_MIFARE_ISO14443A          (0x00)
 
-// --- Local Function Prototypes ---
 static esp_err_t pn532_read_ack(RFID_Reader_t* reader);
 static esp_err_t pn532_wait_ready(RFID_Reader_t* reader, uint16_t timeout);
 static esp_err_t pn532_write_command(RFID_Reader_t* reader, const uint8_t* cmd, uint8_t cmd_len);
@@ -54,13 +49,7 @@ static esp_err_t pn532_wait_ready(RFID_Reader_t* reader, uint16_t timeout) {
     return ESP_ERR_TIMEOUT;
 }
 
-/**
- * @brief Reads and verifies an ACK frame from the PN532.
- *        This version is now robust and waits for the device to be ready.
- */
 static esp_err_t pn532_read_ack(RFID_Reader_t* reader) {
-    // --- TIMING FIX ---
-    // Wait for the PN532 to signal it's ready before we try to read the ACK
     if (pn532_wait_ready(reader, PN532_ACK_TIMEOUT_MS) != ESP_OK) {
         ESP_LOGE(TAG, "Timed out waiting for ACK/NACK frame");
         return ESP_ERR_TIMEOUT;
@@ -69,7 +58,6 @@ static esp_err_t pn532_read_ack(RFID_Reader_t* reader) {
     const uint8_t expected_ack[] = {0x00, 0x00, 0xFF, 0x00, 0xFF, 0x00};
     uint8_t received_ack[sizeof(expected_ack)];
 
-    // We no longer need to read the status byte here because wait_ready confirmed it
     esp_err_t err = i2c_master_receive(reader->i2c_dev_handle, received_ack, sizeof(received_ack), 100);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "I2C read for ACK failed: %s", esp_err_to_name(err));
